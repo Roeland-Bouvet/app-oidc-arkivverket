@@ -16,6 +16,9 @@ import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenClaimsVerifier;
 
@@ -26,6 +29,16 @@ public class OIDCUtils
     public static String generateToken()
     {
         return new BigInteger( 130, new SecureRandom() ).toString( 32 );
+    }
+
+    public static String generateCodeVerifier()
+    {
+        return new CodeVerifier().getValue();
+    }
+
+    public static String generateCodeChallenge( final String codeVerifier )
+    {
+        return CodeChallenge.compute(CodeChallengeMethod.S256, new CodeVerifier( codeVerifier )).toString();
     }
 
     public static ClaimSetMapper parseClaims( final String s, final String issuer, final String clientID, final String nonce )

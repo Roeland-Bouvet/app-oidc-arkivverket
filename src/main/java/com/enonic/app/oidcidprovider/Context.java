@@ -12,12 +12,15 @@ public class Context
 
     private final String originalUrl;
 
+    private final String codeVerifier;
+
     private Context( final Builder builder )
     {
         state = builder.state;
         nonce = builder.nonce;
         redirectUri = builder.redirectUri;
         originalUrl = builder.originalUrl;
+        codeVerifier = builder.codeVerifier;
     }
 
     public static Builder create()
@@ -45,8 +48,13 @@ public class Context
         return originalUrl;
     }
 
+    public String getCodeVerifier()
+    {
+        return codeVerifier;
+    }
+
     public Map<String, String> asMap() {
-        return Map.of( "state", state, "nonce", nonce, "redirectUri", redirectUri, "originalUrl", originalUrl );
+        return Map.of( "state", state, "nonce", nonce, "redirectUri", redirectUri, "originalUrl", originalUrl, "codeVerifier", codeVerifier );
     }
 
     public static Context fromMap( final Map<String, String> map ) {
@@ -55,6 +63,7 @@ public class Context
                 nonce( map.get("nonce") ).
                 redirectUri( map.get("redirectUri") ).
                 originalUrl( map.get("originalUrl") ).
+                codeVerifier( map.get("codeVerifier") ).
                 build();
     }
 
@@ -67,6 +76,8 @@ public class Context
         private String redirectUri;
 
         private String originalUrl;
+
+        private String codeVerifier;
 
         private Builder()
         {
@@ -93,6 +104,12 @@ public class Context
         public Builder originalUrl( final String originalUrl )
         {
             this.originalUrl = originalUrl;
+            return this;
+        }
+
+        public Builder codeVerifier( final String codeVerifier )
+        {
+            this.codeVerifier = codeVerifier;
             return this;
         }
 

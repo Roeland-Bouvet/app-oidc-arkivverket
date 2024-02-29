@@ -14,12 +14,18 @@ function redirectToAuthorizationEndpoint() {
 
     const state = oidcLib.generateToken();
     const nonce = oidcLib.generateToken();
+
+    // Generate PKCE values
+    const codeVerifier = oidcLib.generateCodeVerifier();
+    const codeChallenge = oidcLib.generateCodeChallenge(codeVerifier);
+
     const originalUrl = requestLib.getRequestUrl();
     const context = {
         state: state,
         nonce: nonce,
         originalUrl: originalUrl,
-        redirectUri: redirectUri
+        redirectUri: redirectUri,
+        codeVerifier: codeVerifier
     };
     log.debug('Storing context: ' + JSON.stringify(context));
     requestLib.storeContext(context);
@@ -30,7 +36,9 @@ function redirectToAuthorizationEndpoint() {
         redirectUri: redirectUri,
         scopes: 'openid' + (idProviderConfig.scopes ? ' ' + idProviderConfig.scopes : ''),
         state: state,
-        nonce: nonce
+        nonce: nonce,
+        codeChallenge: codeChallenge,
+        codeChallengeMethod: 'S256'
     });
     log.debug('Generated authorization URL: ' + authorizationUrl);
 
@@ -68,6 +76,7 @@ function handleAuthenticationResponse(req) {
         clientSecret: idProviderConfig.clientSecret,
         redirectUri: context.redirectUri,
         nonce: context.nonce,
+        codeVerifier: context.codeVerifier,
         code: code
     });
 

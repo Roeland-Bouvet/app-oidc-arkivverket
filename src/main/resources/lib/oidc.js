@@ -5,6 +5,14 @@ function generateToken() {
     return Java.type('com.enonic.app.oidcidprovider.OIDCUtils').generateToken();
 }
 
+function generateCodeVerifier() {
+    return Java.type('com.enonic.app.oidcidprovider.OIDCUtils').generateCodeVerifier();
+}
+
+function generateCodeChallenge(codeVerifier) {
+    return Java.type('com.enonic.app.oidcidprovider.OIDCUtils').generateCodeChallenge(codeVerifier);
+}
+
 function parseClaims(jwt, issuer, clientId, nonce) {
     const parsedJwt = Java.type('com.enonic.app.oidcidprovider.OIDCUtils').parseClaims(jwt, issuer, clientId, nonce);
     return __.toNativeObject(parsedJwt);
@@ -21,6 +29,8 @@ function generateAuthorizationUrl(params) {
     const scope = preconditions.checkParameter(params, 'scopes');
     const state = preconditions.checkParameter(params, 'state');
     const nonce = preconditions.checkParameter(params, 'nonce');
+    const codeChallenge = preconditions.checkParameter(params, 'codeChallenge');
+    const codeChallengeMethod = preconditions.checkParameter(params, 'codeChallengeMethod');
 
     //https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
     return authorizationUrl
@@ -29,7 +39,9 @@ function generateAuthorizationUrl(params) {
            + '&client_id=' + encodeURIComponent(clientId)
            + '&redirect_uri=' + encodeURIComponent(redirectUri)
            + '&state=' + state
-           + '&nonce=' + nonce;
+           + '&nonce=' + nonce
+           + '&code_challenge=' + codeChallenge
+           + '&code_challenge_method=' + codeChallengeMethod;
 }
 
 function requestIDToken(params) {
@@ -40,10 +52,11 @@ function requestIDToken(params) {
     const redirectUri = preconditions.checkParameter(params, 'redirectUri');
     const nonce = preconditions.checkParameter(params, 'nonce');
     const code = preconditions.checkParameter(params, 'code');
+    const codeVerifier = preconditions.checkParameter(params, 'codeVerifier');
     const method = params.method;
 
     //https://openid.net/specs/openid-connect-core-1_0.html#TokenRequest
-    let requestParams = {'grant_type': 'authorization_code', 'code': code, 'redirect_uri': redirectUri};
+    let requestParams = {'grant_type': 'authorization_code', 'code': code, 'redirect_uri': redirectUri, 'code_verifier': codeVerifier};
 
     let headers = null;
 
@@ -128,6 +141,8 @@ function mergeClaims(priorityClaims, additionalClaims) {
 }
 
 exports.generateToken = generateToken;
+exports.generateCodeVerifier = generateCodeVerifier;
+exports.generateCodeChallenge = generateCodeChallenge;
 exports.generateAuthorizationUrl = generateAuthorizationUrl;
 exports.requestIDToken = requestIDToken;
 exports.requestOAuth2 = requestOAuth2;
